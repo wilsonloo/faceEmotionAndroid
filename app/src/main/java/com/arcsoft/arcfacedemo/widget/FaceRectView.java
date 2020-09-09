@@ -25,6 +25,9 @@ public class FaceRectView extends View {
     // 默认人脸框厚度
     private static final int DEFAULT_FACE_RECT_THICKNESS = 6;
 
+    // 人脸卡通表情区域
+    private boolean mIsEmotionRectView = false;
+
     public FaceRectView(Context context) {
         this(context, null);
     }
@@ -39,7 +42,7 @@ public class FaceRectView extends View {
         super.onDraw(canvas);
         if (drawInfoList != null && drawInfoList.size() > 0) {
             for (int i = 0; i < drawInfoList.size(); i++) {
-                DrawHelper.drawFaceRect(canvas, drawInfoList.get(i), DEFAULT_FACE_RECT_THICKNESS, paint);
+                DrawHelper.drawFaceRect(this, canvas, drawInfoList.get(i), DEFAULT_FACE_RECT_THICKNESS, paint);
             }
         }
     }
@@ -57,5 +60,13 @@ public class FaceRectView extends View {
     public void addFaceInfo(List<DrawInfo> faceInfoList) {
         drawInfoList.addAll(faceInfoList);
         postInvalidate();
+    }
+
+    public boolean isEmotionRectView(){
+        return mIsEmotionRectView;
+    }
+
+    public void setIsEmotionRectView(boolean set){
+        mIsEmotionRectView = set;
     }
 }

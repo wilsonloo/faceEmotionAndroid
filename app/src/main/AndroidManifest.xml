@@ -23,6 +23,9 @@
             android:name=".activity.FaceAttrPreviewActivity"
             android:launchMode="singleTop" />
         <activity
+            android:name=".activity.DetectFaceEmotionActivity"
+            android:launchMode="singleTop" />
+        <activity
             android:name=".activity.ChooseFunctionActivity"
             android:launchMode="singleTop">
             <intent-filter>

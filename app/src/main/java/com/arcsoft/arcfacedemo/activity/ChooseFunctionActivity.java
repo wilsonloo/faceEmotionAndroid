@@ -183,7 +183,6 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToFaceRecognizeActivity(View view) {
-        int b =10/0;
         checkLibraryAndJump(RegisterAndRecognizeActivity.class);
     }
 

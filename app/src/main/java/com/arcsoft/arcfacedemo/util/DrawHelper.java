@@ -4,8 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.view.View;
 
+import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
 import com.arcsoft.arcfacedemo.widget.FaceRectView;
 import com.arcsoft.face.AgeInfo;
@@ -178,7 +182,7 @@ public class DrawHelper {
      * @param faceRectThickness 人脸框厚度
      * @param paint             画笔
      */
-    public static void drawFaceRect(Canvas canvas, DrawInfo drawInfo, int faceRectThickness, Paint paint) {
+    public static void drawFaceRect(FaceRectView view, Canvas canvas, DrawInfo drawInfo, int faceRectThickness, Paint paint) {
         if (canvas == null || drawInfo == null) {
             return;
         }
@@ -224,6 +228,13 @@ public class DrawHelper {
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
             paint.setTextSize(rect.width() / 8);
             canvas.drawText(drawInfo.getName(), rect.left, rect.top - 10, paint);
+        }
+
+        // 绘制卡通表情
+        if(view.isEmotionRectView()) {
+            Bitmap bitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+            //左上角的坐标left,top
+            canvas.drawBitmap(bitmap, rect.left, rect.top, paint);
         }
     }
 

@@ -182,7 +182,6 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int a =10/0;
         setContentView(R.layout.activity_detect_face_emotion);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -195,8 +194,12 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         previewView = findViewById(R.id.fe_texture_preview);
+
         faceRectView = findViewById(R.id.fe_face_rect_view);
+        faceRectView.setIsEmotionRectView(false);
+
         emotionRectView = findViewById(R.id.fe_emotion_rect_view);
+        emotionRectView.setIsEmotionRectView(true);
 
         //在布局结束后才做初始化操作
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);
