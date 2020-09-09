@@ -15,12 +15,12 @@
         tools:context=".activity.FaceAttrPreviewActivity">
 
         <TextureView
-            android:id="@+id/texture_preview"
+            android:id="@+id/fe_texture_preview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
         <com.arcsoft.arcfacedemo.widget.FaceRectView
-            android:id="@+id/face_rect_view"
+            android:id="@+id/fe_face_rect_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>
@@ -34,13 +34,8 @@
         android:layout_weight="1"
         tools:context=".activity.FaceAttrPreviewActivity">
 
-        <TextureView
-            android:id="@+id/texture_emotion"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
         <com.arcsoft.arcfacedemo.widget.FaceRectView
-            android:id="@+id/face_rect_emotion"
+            android:id="@+id/fe_emotion_rect_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>

@@ -21,6 +21,7 @@ import com.arcsoft.face.ActiveFileInfo;
 import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.enums.RuntimeABI;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -71,6 +72,8 @@ public class ChooseFunctionActivity extends BaseActivity {
         } else {
             initView();
         }
+
+        CrashReport.initCrashReport(getApplicationContext(), "65b12e9090", true);
     }
 
     /**
@@ -180,6 +183,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToFaceRecognizeActivity(View view) {
+        int b =10/0;
         checkLibraryAndJump(RegisterAndRecognizeActivity.class);
     }
 
@@ -207,7 +211,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToDetectFaceEmotionActivity(View view) {
-        checkLibraryAndJump(DetectFaceEmotion.class);
+        checkLibraryAndJump(DetectFaceEmotionActivity.class);
     }
 
     /**
