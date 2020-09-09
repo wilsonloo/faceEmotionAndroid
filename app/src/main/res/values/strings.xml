@@ -79,5 +79,6 @@
     <string name="batch_process_processing_please_wait">process start,please wait</string>
     <string name="batch_process_finished_info">process finished!\ntotal count =  %d \nsuccess count = %d \nfailed count = %d \nfailed images are in directory \' %s \'</string>
 
-
+    <string name="rbtn_back_camera">back camera</string>
+    <string name="rbtn_front_camera">front camera</string>
 </resources>

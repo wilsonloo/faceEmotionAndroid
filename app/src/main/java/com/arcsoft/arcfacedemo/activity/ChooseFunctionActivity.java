@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -60,6 +61,28 @@ public class ChooseFunctionActivity extends BaseActivity {
             "libarcsoft_image_util.so",
     };
 
+    // 摄像头索引
+    private int mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+
+    private RadioGroup.OnCheckedChangeListener mRadioGroupChooseCameraListener = new RadioGroup.OnCheckedChangeListener(){
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+            int id = group.getCheckedRadioButtonId();
+            switch (group.getCheckedRadioButtonId()) {
+                case R.id.rb_back_camera:
+                    mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+                    break;
+                case R.id.rb_front_camera:
+                    mCameraIndex = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                    break;
+                default:
+                    assert false;
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,8 +96,14 @@ public class ChooseFunctionActivity extends BaseActivity {
             initView();
         }
 
+        // 表情检测的摄像头选择
+        RadioGroup radioGroupChooseCamera =  findViewById(R.id.radio_group_choose_camera);
+        radioGroupChooseCamera.check(R.id.rb_back_camera);
+        radioGroupChooseCamera.setOnCheckedChangeListener(mRadioGroupChooseCameraListener);
+
         CrashReport.initCrashReport(getApplicationContext(), "65b12e9090", true);
     }
+
 
     /**
      * 检查能否找到动态链接库，如果找不到，请修改工程配置
@@ -156,7 +185,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToPreviewActivity(View view) {
-        checkLibraryAndJump(FaceAttrPreviewActivity.class);
+        checkLibraryAndJump(FaceAttrPreviewActivity.class, null);
     }
 
     /**
@@ -165,7 +194,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToSingleImageActivity(View view) {
-        checkLibraryAndJump(SingleImageActivity.class);
+        checkLibraryAndJump(SingleImageActivity.class, null);
     }
 
     /**
@@ -174,7 +203,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToMultiImageActivity(View view) {
-        checkLibraryAndJump(MultiImageActivity.class);
+        checkLibraryAndJump(MultiImageActivity.class, null);
     }
 
     /**
@@ -183,7 +212,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToFaceRecognizeActivity(View view) {
-        checkLibraryAndJump(RegisterAndRecognizeActivity.class);
+        checkLibraryAndJump(RegisterAndRecognizeActivity.class, null);
     }
 
     /**
@@ -192,7 +221,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToIrFaceRecognizeActivity(View view) {
-        checkLibraryAndJump(IrRegisterAndRecognizeActivity.class);
+        checkLibraryAndJump(IrRegisterAndRecognizeActivity.class, null);
     }
 
     /**
@@ -201,7 +230,7 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToBatchRegisterActivity(View view) {
-        checkLibraryAndJump(FaceManageActivity.class);
+        checkLibraryAndJump(FaceManageActivity.class, null);
     }
 
     /**
@@ -210,7 +239,9 @@ public class ChooseFunctionActivity extends BaseActivity {
      * @param view
      */
     public void jumpToDetectFaceEmotionActivity(View view) {
-        checkLibraryAndJump(DetectFaceEmotionActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("whichCamera", mCameraIndex);
+        checkLibraryAndJump(DetectFaceEmotionActivity.class, bundle);
     }
 
     /**
@@ -294,13 +325,14 @@ public class ChooseFunctionActivity extends BaseActivity {
         }
     }
 
-    void checkLibraryAndJump(Class activityClass) {
+    void checkLibraryAndJump(Class activityClass, Bundle bundle) {
         if (!libraryExists) {
             showToast(getString(R.string.library_not_found));
             return;
         }
-        startActivity(new Intent(this, activityClass));
+
+        Intent intent = new Intent(this, activityClass);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
-
-
 }

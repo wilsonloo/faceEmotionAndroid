@@ -2,6 +2,7 @@ package com.arcsoft.arcfacedemo.activity;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -182,6 +183,11 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 摄像头
+        Intent intent = getIntent();
+        rgbCameraId = intent.getIntExtra("whichCamera", Camera.CameraInfo.CAMERA_FACING_BACK);
+
         setContentView(R.layout.activity_detect_face_emotion);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

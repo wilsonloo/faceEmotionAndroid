@@ -90,12 +90,40 @@
             android:onClick="jumpToBatchRegisterActivity"
             android:text="@string/page_face_manage" />
 
-        <Button
-            android:gravity="center"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="jumpToDetectFaceEmotionActivity"
-            android:text="@string/page_face_emotion" />
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:onClick="jumpToDetectFaceEmotionActivity"
+                android:text="@string/page_face_emotion" />
+
+            <RadioGroup
+                android:id="@+id/radio_group_choose_camera"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_back_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/rbtn_back_camera" />
+
+                <RadioButton
+                    android:id="@+id/rb_front_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rbtn_front_camera" />
+            </RadioGroup>
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>
