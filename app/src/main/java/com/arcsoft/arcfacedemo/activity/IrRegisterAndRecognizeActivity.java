@@ -726,14 +726,16 @@ public class IrRegisterAndRecognizeActivity extends BaseActivity implements View
             drawInfoList.add(new DrawInfo(drawHelperRgb.adjustRect(ftRect),
                     GenderInfo.UNKNOWN, AgeInfo.UNKNOWN_AGE,
                     liveness != null ? liveness : LivenessInfo.UNKNOWN, color,
-                    name == null ? String.valueOf(trackId) : name));
+                    name == null ? String.valueOf(trackId) : name,
+                    null));
 
             Rect offsetFtRect = new Rect(ftRect);
             offsetFtRect.offset(Constants.HORIZONTAL_OFFSET, Constants.VERTICAL_OFFSET);
             drawInfoListIr.add(new DrawInfo(drawHelperIr.adjustRect(offsetFtRect),
                     GenderInfo.UNKNOWN, AgeInfo.UNKNOWN_AGE,
                     liveness != null ? liveness : LivenessInfo.UNKNOWN, color,
-                    name == null ? String.valueOf(trackId) : name));
+                    name == null ? String.valueOf(trackId) : name,
+                    null));
         }
         drawHelperRgb.draw(faceRectView, drawInfoList);
         drawHelperIr.draw(faceRectViewIr, drawInfoListIr);

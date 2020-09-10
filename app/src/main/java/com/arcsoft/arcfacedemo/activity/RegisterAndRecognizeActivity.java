@@ -580,7 +580,8 @@ public class RegisterAndRecognizeActivity extends BaseActivity implements ViewTr
 
             drawInfoList.add(new DrawInfo(drawHelper.adjustRect(facePreviewInfoList.get(i).getFaceInfo().getRect()),
                     GenderInfo.UNKNOWN, AgeInfo.UNKNOWN_AGE, liveness == null ? LivenessInfo.UNKNOWN : liveness, color,
-                    name == null ? String.valueOf(facePreviewInfoList.get(i).getTrackId()) : name));
+                    name == null ? String.valueOf(facePreviewInfoList.get(i).getTrackId()) : name,
+                    null));
         }
         drawHelper.draw(faceRectView, drawInfoList);
     }

@@ -20,6 +20,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    // aapt默认压缩assets下面的文件，直接openFd打不开
+    aaptOptions {
+        noCompress "tflite"  //表示不让aapt压缩的文件后缀
+    }
 }
 
 dependencies {

@@ -232,7 +232,10 @@ public class DrawHelper {
 
         // 绘制卡通表情
         if(view.isEmotionRectView()) {
-            Bitmap bitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+            Bitmap bitmap = drawInfo.getBitmap();
+            if (bitmap == null) {
+                bitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+            }
             //左上角的坐标left,top
             canvas.drawBitmap(bitmap, rect.left, rect.top, paint);
         }

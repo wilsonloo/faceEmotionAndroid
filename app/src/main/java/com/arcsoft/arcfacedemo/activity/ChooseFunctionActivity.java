@@ -102,6 +102,11 @@ public class ChooseFunctionActivity extends BaseActivity {
 
         CrashReport.initCrashReport(getApplicationContext(), "65b12e9090", true);
 
+//        testStaticEmotionClassify();
+    }
+
+    // 测试静态表情分类
+    private void testStaticEmotionClassify(){
         try {
             Classifier testClassifier = Classifier.Create(this,
                     Classifier.Model.FLOAT_MOBILENET,
@@ -110,8 +115,10 @@ public class ChooseFunctionActivity extends BaseActivity {
 
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.tflite_test);
             ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) testClassifier.RecognizeImage(bitmap, 90);
-            for(Classifier.Recognition elem : recognitions){
-                System.out.printf("%s : %f", elem.getTitle(), elem.getConfidence());
+            System.out.printf(">>> %d recognized \n", recognitions.size());
+            for(int k = 0; k < recognitions.size(); ++k){
+                Classifier.Recognition elem = recognitions.get(k);
+                System.out.printf("[%d] %s : %f\n", k, elem.getTitle(), elem.getConfidence());
             }
         } catch (Exception e) {
             e.printStackTrace();

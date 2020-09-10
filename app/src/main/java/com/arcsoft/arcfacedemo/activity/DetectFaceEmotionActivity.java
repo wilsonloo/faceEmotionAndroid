@@ -4,13 +4,19 @@ package com.arcsoft.arcfacedemo.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -34,6 +40,7 @@ import com.arcsoft.face.VersionInfo;
 import com.arcsoft.face.enums.DetectMode;
 import com.arcsoft.face.model.ArcSoftImageInfo;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,10 +145,52 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                     return;
                 }
 
+                // 摄像机画面对应的位图
+                Bitmap previewBitmap = null;
+                {
+//                   camera.setOneShotPreviewCallback(null);
+                    //处理data
+                    Camera.Size previewSize = camera.getParameters().getPreviewSize();//获取尺寸,格式转换的时候要用到
+                    BitmapFactory.Options newOpts = new BitmapFactory.Options();
+                    newOpts.inJustDecodeBounds = true;
+                    YuvImage yuvimage = new YuvImage(
+                            nv21,
+                            ImageFormat.NV21,
+                            previewSize.width,
+                            previewSize.height,
+                            null);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    yuvimage.compressToJpeg(new Rect(0, 0, previewSize.width, previewSize.height), 100, baos);// 80--JPG图片的质量[0-100],100最高
+                    byte[] rawImage = baos.toByteArray();
+                    //将rawImage转换成bitmap
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.RGB_565;
+                    previewBitmap = BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length, options);
+                }
+
                 if (faceRectView != null && emotionRectView != null && drawHelper != null) {
                     List<DrawInfo> drawInfoList = new ArrayList<>();
                     for (int i = 0; i < faceInfoList.size(); i++) {
-                        drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), RecognizeColor.COLOR_UNKNOWN, null));
+                        // 抓取脸部的位图
+                        Rect rawFaceRect = faceInfoList.get(i).getRect();
+                        Rect adjustFaceRect = drawHelper.adjustRect(rawFaceRect);
+                        int x = rawFaceRect.left;
+                        int y = rawFaceRect.top;
+                        int width = rawFaceRect.right - rawFaceRect.left;
+                        int height = rawFaceRect.bottom - rawFaceRect.top;
+                        Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height);
+                        // Bitmap faceBitmap = previewBitmap;
+
+                        DrawInfo newDrawInfo = new DrawInfo(
+                                adjustFaceRect,
+                                genderInfoList.get(i).getGender(),
+                                ageInfoList.get(i).getAge(),
+                                faceLivenessInfoList.get(i).getLiveness(),
+                                RecognizeColor.COLOR_UNKNOWN,
+                                null,
+                                faceBitmap);
+
+                        drawInfoList.add(newDrawInfo);
                     }
                     drawHelper.draw(faceRectView, drawInfoList);
                     drawHelper.draw(emotionRectView, drawInfoList);
