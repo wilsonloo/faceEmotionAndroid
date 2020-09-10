@@ -179,7 +179,8 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         int width = rawFaceRect.right - rawFaceRect.left;
                         int height = rawFaceRect.bottom - rawFaceRect.top;
                         Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height);
-                        // Bitmap faceBitmap = previewBitmap;
+                        Bundle bundle = new Bundle();
+                        bundle
 
                         DrawInfo newDrawInfo = new DrawInfo(
                                 adjustFaceRect,

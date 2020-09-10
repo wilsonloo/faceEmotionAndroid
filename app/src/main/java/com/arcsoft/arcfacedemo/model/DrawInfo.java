@@ -10,16 +10,16 @@ public class DrawInfo {
     private int liveness;
     private int color;
     private String name = null;
-    private Bitmap bitmap = null;
+    private Bundle bundle = null;
 
-    public DrawInfo(Rect rect, int sex, int age,int liveness,int color,String name, Bitmap bitmap) {
+    public DrawInfo(Rect rect, int sex, int age,int liveness,int color,String name, Bundle bundle) {
         this.rect = rect;
         this.sex = sex;
         this.age = age;
         this.liveness = liveness;
         this.color = color;
         this.name = name;
-        this.bitmap = bitmap;
+        this.bundle = bundle;
     }
 
     public String getName() {
@@ -70,5 +70,6 @@ public class DrawInfo {
         this.color = color;
     }
 
-    public Bitmap getBitmap() { return this.bitmap;}
+    public Bundle getBundle() { return this.bundle;}
+    public void setBundle(Bundle bundle){this.bundle = bundle;}
 }
