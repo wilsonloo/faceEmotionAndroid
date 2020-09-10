@@ -1,14 +1,12 @@
 package com.arcsoft.arcfacedemo.activity;
 
 import android.Manifest;
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +15,7 @@ import android.widget.RadioGroup;
 
 import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.common.Constants;
+import com.arcsoft.arcfacedemo.tflite.Classifier;
 import com.arcsoft.arcfacedemo.util.ConfigUtil;
 import com.arcsoft.face.ActiveFileInfo;
 import com.arcsoft.face.ErrorInfo;
@@ -25,7 +24,7 @@ import com.arcsoft.face.enums.RuntimeABI;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,8 +101,23 @@ public class ChooseFunctionActivity extends BaseActivity {
         radioGroupChooseCamera.setOnCheckedChangeListener(mRadioGroupChooseCameraListener);
 
         CrashReport.initCrashReport(getApplicationContext(), "65b12e9090", true);
-    }
 
+        try {
+            Classifier testClassifier = Classifier.Create(this,
+                    Classifier.Model.FLOAT_MOBILENET,
+                    Classifier.Device.CPU,
+                    1);
+
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.tflite_test);
+            ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) testClassifier.RecognizeImage(bitmap, 90);
+            for(Classifier.Recognition elem : recognitions){
+                System.out.printf("%s : %f", elem.getTitle(), elem.getConfidence());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            CrashReport.postCatchedException(e);
+        }
+    }
 
     /**
      * 检查能否找到动态链接库，如果找不到，请修改工程配置
