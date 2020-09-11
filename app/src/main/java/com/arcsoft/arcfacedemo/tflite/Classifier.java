@@ -23,8 +23,10 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -75,6 +77,8 @@ public abstract class Classifier {
   /** Processer to apply post processing of the output probability. */
   private final TensorProcessor probabilityProcessor;
 
+  private final Map<String, Integer> mEmotionResourceMap = new HashMap<>();
+
   // 识别结果
   public static class Recognition {
     private final String id;
@@ -95,6 +99,12 @@ public abstract class Classifier {
 
   // 内部构造函数，应该由工厂接口create创建实例
   protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
+    mEmotionResourceMap.put("anger", R.mipmap.anger);
+    mEmotionResourceMap.put("disgust", R.mipmap.disgust);
+    mEmotionResourceMap.put("fear", R.mipmap.fear);
+    mEmotionResourceMap.put("happy", R.mipmap.happy);
+    mEmotionResourceMap.put("sad", R.mipmap.sad);
+
     // 加载tflite 模型
     String modelPath = getModelPath();
     tfliteModel = FileUtil.loadMappedFile(activity, modelPath);
@@ -245,20 +255,14 @@ public abstract class Classifier {
       }
   }
 
-    public static Integer GetEmotionResourceId(String typeName){
-        if(typeName == "anger"){
-          return R.mipmap.anger;
-        }else if(typeName == "disgust"){
-          return R.mipmap.disgust;
-        }else if(typeName == "fear"){
-          return R.mipmap.fear;
-        }else if(typeName == "happy"){
-          return R.mipmap.happy;
-        }else if(typeName == "sad"){
-          return R.mipmap.sad;
-        }else{
-          CrashReport.postCatchedException(new Exception("unknown emotion type:"+typeName));
-          return null;
+    public Integer GetEmotionResourceId(String typeName)
+        throws InvalidParameterException
+    {
+        Integer resource = mEmotionResourceMap.get(typeName);
+        if(resource == null){
+            throw new InvalidParameterException("unknown emotion type:"+typeName +":"+ typeName.length());
         }
+
+        return resource;
     }
 }

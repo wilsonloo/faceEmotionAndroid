@@ -180,10 +180,10 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         // 抓取脸部的位图
                         Rect rawFaceRect = faceInfoList.get(i).getRect();
                         Rect adjustFaceRect = drawHelper.adjustRect(rawFaceRect);
-                        int x = rawFaceRect.left;
-                        int y = rawFaceRect.top;
-                        int width = rawFaceRect.right - rawFaceRect.left;
-                        int height = rawFaceRect.bottom - rawFaceRect.top;
+                        int x = Math.max(0, rawFaceRect.left);
+                        int y = Math.max(0, rawFaceRect.top);
+                        int width = Math.min(previewBitmap.getWidth(), rawFaceRect.right - x);
+                        int height = Math.min(previewBitmap.getHeight(), rawFaceRect.bottom - y);
                         Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height);
                         Bundle bundle = new Bundle();
                         bundle.putParcelable("faceBitmap", faceBitmap);

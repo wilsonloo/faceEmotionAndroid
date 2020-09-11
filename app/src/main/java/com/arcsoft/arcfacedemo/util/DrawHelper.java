@@ -221,24 +221,10 @@ public class DrawHelper {
         // 绘制文字，用最细的即可，避免在某些低像素设备上文字模糊
         paint.setStrokeWidth(1);
 
-        if (drawInfo.getName() == null) {
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTextSize(rect.width() / 8);
-
-            String str = (drawInfo.getSex() == GenderInfo.MALE ? "MALE" : (drawInfo.getSex() == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"))
-                    + ","
-                    + (drawInfo.getAge() == AgeInfo.UNKNOWN_AGE ? "UNKNWON" : drawInfo.getAge())
-                    + ","
-                    + (drawInfo.getLiveness() == LivenessInfo.ALIVE ? "ALIVE" : (drawInfo.getLiveness() == LivenessInfo.NOT_ALIVE ? "NOT_ALIVE" : "UNKNOWN"));
-            canvas.drawText(str, rect.left, rect.top - 10, paint);
-        } else {
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTextSize(rect.width() / 8);
-            canvas.drawText(drawInfo.getName(), rect.left, rect.top - 10, paint);
-        }
-
         // 绘制卡通表情
         if (view.getId() == R.id.fe_emotion_rect_view) {
+            String faceDesc = "unknown";
+
             Bundle bundle = drawInfo.getBundle();
             if (bundle != null) {
                 // 对人脸进行表情预测
@@ -248,13 +234,15 @@ public class DrawHelper {
                     // 进行分类预测，并产生表情
                     DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
                     Classifier classifier = curActivity.getClassifier();
-                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap, 90);
+                    Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 90);
                     if(recognitions.size() > 0){
                         Classifier.Recognition predict = recognitions.get(1);
-                        if(predict.getConfidence() > 0.8){
+                        if(predict.getConfidence() > 0.0){
                             String emotionType = predict.getTitle();
-                            Integer emotionResourceId = Classifier.GetEmotionResourceId(emotionType);
+                            Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
                             emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
+                            faceDesc = emotionType + " clevel:"+predict.getConfidence();
                         }
                     }
                 }
@@ -263,9 +251,31 @@ public class DrawHelper {
                     emotionBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
                 }
 
+                // 绘制识别信息
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setTextSize(rect.width() / 8);
+                canvas.drawText(faceDesc, rect.left, rect.top - 10, paint);
+
                 // 左上角的坐标left,top
                 canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
             }
+        }else{
+            if (drawInfo.getName() == null) {
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setTextSize(rect.width() / 8);
+
+                String str = (drawInfo.getSex() == GenderInfo.MALE ? "MALE" : (drawInfo.getSex() == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"))
+                        + ","
+                        + (drawInfo.getAge() == AgeInfo.UNKNOWN_AGE ? "UNKNWON" : drawInfo.getAge())
+                        + ","
+                        + (drawInfo.getLiveness() == LivenessInfo.ALIVE ? "ALIVE" : (drawInfo.getLiveness() == LivenessInfo.NOT_ALIVE ? "NOT_ALIVE" : "UNKNOWN"));
+                canvas.drawText(str, rect.left, rect.top - 10, paint);
+            } else {
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setTextSize(rect.width() / 8);
+                canvas.drawText(drawInfo.getName(), rect.left, rect.top - 10, paint);
+            }
+
         }
     }
 
