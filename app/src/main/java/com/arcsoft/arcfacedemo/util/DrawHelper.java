@@ -22,6 +22,7 @@ import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.GenderInfo;
 import com.arcsoft.face.LivenessInfo;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -228,8 +229,12 @@ public class DrawHelper {
             Bundle bundle = drawInfo.getBundle();
             if (bundle != null) {
                 // 对人脸进行表情预测
-                Bitmap emotionBitmap = null;
                 Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
+                Bitmap emotionBitmap = null;
+
+                // todo
+                emotionBitmap = faceBitmap;
+                /*
                 if (faceBitmap != null) {
                     // 进行分类预测，并产生表情
                     DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
@@ -242,10 +247,12 @@ public class DrawHelper {
                             String emotionType = predict.getTitle();
                             Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
                             emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
-                            faceDesc = emotionType + " clevel:"+predict.getConfidence();
+
+                            DecimalFormat fConfidence = new DecimalFormat("##0.00");
+                            faceDesc = emotionType + " clevel:" + fConfidence.format(predict.getConfidence());
                         }
                     }
-                }
+                }*/
 
                 if(emotionBitmap == null){
                     emotionBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);

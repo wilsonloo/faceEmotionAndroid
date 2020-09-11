@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -184,7 +185,9 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         int y = Math.max(0, rawFaceRect.top);
                         int width = Math.min(previewBitmap.getWidth(), rawFaceRect.right - x);
                         int height = Math.min(previewBitmap.getHeight(), rawFaceRect.bottom - y);
-                        Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height);
+                        Matrix matrix = new Matrix();
+                        matrix.setRotate(90);
+                        Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height, matrix, false);
                         Bundle bundle = new Bundle();
                         bundle.putParcelable("faceBitmap", faceBitmap);
 
