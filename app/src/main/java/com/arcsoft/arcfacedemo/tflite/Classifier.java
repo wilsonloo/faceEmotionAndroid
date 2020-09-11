@@ -33,7 +33,7 @@ import java.util.PriorityQueue;
 
 public abstract class Classifier {
   /** Number of results to show in the UI. */
-  private static final int MAX_RESULTS = 3;
+  private static final int MAX_RESULTS = 5;
 
   /** The model type used for classification. */
   public enum Model {
@@ -170,12 +170,11 @@ public abstract class Classifier {
     Trace.endSection();
 
     // 获取前几项结果
-    return getTopKProbability(labeledProbability);
+    return getTopKProbability(labeledProbability, 1);
   }
 
   // 获取前K排名
-  private static List<Recognition> getTopKProbability(
-      Map<String /*标签*/, Float /*预测成该标签的概率*/> labelProb) {
+  private static List<Recognition> getTopKProbability(Map<String /*标签*/, Float /*预测成该标签的概率*/> labelProb, int topK) {
     // 使用最大堆实现
     PriorityQueue<Recognition> pq =
         new PriorityQueue<>(
@@ -183,7 +182,7 @@ public abstract class Classifier {
             new Comparator<Recognition>() {
               @Override
               public int compare(Recognition o1, Recognition o2) {
-                return Float.compare(o2.getConfidence(), o1.getConfidence());
+                return o2.getConfidence().compareTo(o1.getConfidence());
               }
             });
 

@@ -232,9 +232,6 @@ public class DrawHelper {
                 Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
                 Bitmap emotionBitmap = null;
 
-                // todo
-                emotionBitmap = faceBitmap;
-                /*
                 if (faceBitmap != null) {
                     // 进行分类预测，并产生表情
                     DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
@@ -242,7 +239,7 @@ public class DrawHelper {
                     Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
                     ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 90);
                     if(recognitions.size() > 0){
-                        Classifier.Recognition predict = recognitions.get(1);
+                        Classifier.Recognition predict = recognitions.get(0);
                         if(predict.getConfidence() > 0.0){
                             String emotionType = predict.getTitle();
                             Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
@@ -252,7 +249,7 @@ public class DrawHelper {
                             faceDesc = emotionType + " clevel:" + fConfidence.format(predict.getConfidence());
                         }
                     }
-                }*/
+                }
 
                 if(emotionBitmap == null){
                     emotionBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
