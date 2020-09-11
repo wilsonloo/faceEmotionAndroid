@@ -2,6 +2,7 @@ package com.arcsoft.arcfacedemo.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Bundle;
 
 public class DrawInfo {
     private Rect rect;

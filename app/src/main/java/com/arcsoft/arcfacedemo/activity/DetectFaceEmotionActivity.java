@@ -180,7 +180,7 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         int height = rawFaceRect.bottom - rawFaceRect.top;
                         Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height);
                         Bundle bundle = new Bundle();
-                        bundle
+                        bundle.putParcelable("faceBitmap", faceBitmap);
 
                         DrawInfo newDrawInfo = new DrawInfo(
                                 adjustFaceRect,
@@ -189,7 +189,7 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                                 faceLivenessInfoList.get(i).getLiveness(),
                                 RecognizeColor.COLOR_UNKNOWN,
                                 null,
-                                faceBitmap);
+                                bundle);
 
                         drawInfoList.add(newDrawInfo);
                     }
@@ -250,12 +250,8 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         previewView = findViewById(R.id.fe_texture_preview);
-
         faceRectView = findViewById(R.id.fe_face_rect_view);
-        faceRectView.setIsEmotionRectView(false);
-
         emotionRectView = findViewById(R.id.fe_emotion_rect_view);
-        emotionRectView.setIsEmotionRectView(true);
 
         //在布局结束后才做初始化操作
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);

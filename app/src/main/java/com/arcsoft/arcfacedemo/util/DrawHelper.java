@@ -1,5 +1,8 @@
 package com.arcsoft.arcfacedemo.util;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -7,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.os.Bundle;
 import android.view.View;
 
 import com.arcsoft.arcfacedemo.R;
@@ -231,13 +235,23 @@ public class DrawHelper {
         }
 
         // 绘制卡通表情
-        if(view.isEmotionRectView()) {
-            Bitmap bitmap = drawInfo.getBitmap();
-            if (bitmap == null) {
-                bitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+        if (view.getId() == R.id.fe_emotion_rect_view) {
+            Bundle bundle = drawInfo.getBundle();
+            if (bundle != null) {
+                Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
+                if (faceBitmap == null) {
+                    faceBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+                }
+
+                // 左上角的坐标left,top
+                canvas.drawBitmap(faceBitmap, rect.left, rect.top, paint);
             }
-            //左上角的坐标left,top
-            canvas.drawBitmap(bitmap, rect.left, rect.top, paint);
+
+            ActivityManager activityManager = (ActivityManager) view.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningTaskInfo> list = activityManager.getRunningTasks(1);
+            if (!list.isEmpty() && list.get(0) != null && list.get(0).topActivity != null) {
+                Activity aa = list.get(0).
+                        }
         }
     }
 

@@ -61,12 +61,4 @@ public class FaceRectView extends View {
         drawInfoList.addAll(faceInfoList);
         postInvalidate();
     }
-
-    public boolean isEmotionRectView(){
-        return mIsEmotionRectView;
-    }
-
-    public void setIsEmotionRectView(boolean set){
-        mIsEmotionRectView = set;
-    }
 }
