@@ -14,12 +14,15 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.arcsoft.arcfacedemo.R;
+import com.arcsoft.arcfacedemo.activity.DetectFaceEmotionActivity;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
+import com.arcsoft.arcfacedemo.tflite.Classifier;
 import com.arcsoft.arcfacedemo.widget.FaceRectView;
 import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.GenderInfo;
 import com.arcsoft.face.LivenessInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -238,20 +241,31 @@ public class DrawHelper {
         if (view.getId() == R.id.fe_emotion_rect_view) {
             Bundle bundle = drawInfo.getBundle();
             if (bundle != null) {
+                // 对人脸进行表情预测
+                Bitmap emotionBitmap = null;
                 Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
-                if (faceBitmap == null) {
-                    faceBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
+                if (faceBitmap != null) {
+                    // 进行分类预测，并产生表情
+                    DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
+                    Classifier classifier = curActivity.getClassifier();
+                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap, 90);
+                    if(recognitions.size() > 0){
+                        Classifier.Recognition predict = recognitions.get(1);
+                        if(predict.getConfidence() > 0.8){
+                            String emotionType = predict.getTitle();
+                            Integer emotionResourceId = Classifier.GetEmotionResourceId(emotionType);
+                            emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
+                        }
+                    }
+                }
+
+                if(emotionBitmap == null){
+                    emotionBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
                 }
 
                 // 左上角的坐标left,top
-                canvas.drawBitmap(faceBitmap, rect.left, rect.top, paint);
+                canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
             }
-
-            ActivityManager activityManager = (ActivityManager) view.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> list = activityManager.getRunningTasks(1);
-            if (!list.isEmpty() && list.get(0) != null && list.get(0).topActivity != null) {
-                Activity aa = list.get(0).
-                        }
         }
     }
 

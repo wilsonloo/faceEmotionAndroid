@@ -23,6 +23,7 @@ import android.view.WindowManager;
 
 import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
+import com.arcsoft.arcfacedemo.tflite.Classifier;
 import com.arcsoft.arcfacedemo.util.ConfigUtil;
 import com.arcsoft.arcfacedemo.util.DrawHelper;
 import com.arcsoft.arcfacedemo.util.camera.CameraHelper;
@@ -39,6 +40,7 @@ import com.arcsoft.face.LivenessInfo;
 import com.arcsoft.face.VersionInfo;
 import com.arcsoft.face.enums.DetectMode;
 import com.arcsoft.face.model.ArcSoftImageInfo;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -74,6 +76,10 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
     private FaceEngine faceEngine;
     private int afCode = -1;
+
+    private Classifier mClassifier;
+
+    public Classifier getClassifier(){ return mClassifier;}
 
     // 私有函数列表 ***********************************************************
     private void initEngine() {
@@ -229,6 +235,19 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
         cameraHelper.start();
     }
 
+    private void initClassifier(int numThreads){
+        try {
+            mClassifier = Classifier.Create(this,
+                    Classifier.Model.FLOAT_MOBILENET,
+                    Classifier.Device.CPU,
+                    numThreads);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            CrashReport.postCatchedException(e);
+        }
+    }
+
     // 函数列表 ***********************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -252,6 +271,9 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
         previewView = findViewById(R.id.fe_texture_preview);
         faceRectView = findViewById(R.id.fe_face_rect_view);
         emotionRectView = findViewById(R.id.fe_emotion_rect_view);
+
+        // 分类器
+        initClassifier(4);
 
         //在布局结束后才做初始化操作
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);

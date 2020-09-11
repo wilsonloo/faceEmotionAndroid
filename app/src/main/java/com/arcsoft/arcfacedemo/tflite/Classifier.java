@@ -2,20 +2,16 @@ package com.arcsoft.arcfacedemo.tflite;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Trace;
-import android.view.ViewDebug;
 
 import com.arcsoft.arcfacedemo.R;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
-import org.tensorflow.lite.nnapi.NnApiDelegate;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.common.TensorProcessor;
-import org.tensorflow.lite.support.common.ops.NormalizeOp;
 import org.tensorflow.lite.support.image.ImageProcessor;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
@@ -242,10 +238,27 @@ public abstract class Classifier {
    */
   public static Classifier Create(Activity activity, Model model, Device device, int numThreads)
       throws IOException {
-    if (model == Model.FLOAT_MOBILENET) {
-      return new ClassifierFloatMobileNet(activity, device, numThreads);
-    } else {
-      throw new UnsupportedOperationException("model:" + model);
-    }
+      if (model == Model.FLOAT_MOBILENET) {
+          return new ClassifierFloatMobileNet(activity, device, numThreads);
+      } else {
+          throw new UnsupportedOperationException("model:" + model);
+      }
   }
+
+    public static Integer GetEmotionResourceId(String typeName){
+        if(typeName == "anger"){
+          return R.mipmap.anger;
+        }else if(typeName == "disgust"){
+          return R.mipmap.disgust;
+        }else if(typeName == "fear"){
+          return R.mipmap.fear;
+        }else if(typeName == "happy"){
+          return R.mipmap.happy;
+        }else if(typeName == "sad"){
+          return R.mipmap.sad;
+        }else{
+          CrashReport.postCatchedException(new Exception("unknown emotion type:"+typeName));
+          return null;
+        }
+    }
 }
