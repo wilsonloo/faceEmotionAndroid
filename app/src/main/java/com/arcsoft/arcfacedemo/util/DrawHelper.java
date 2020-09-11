@@ -240,7 +240,7 @@ public class DrawHelper {
                     ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 90);
                     if(recognitions.size() > 0){
                         Classifier.Recognition predict = recognitions.get(0);
-                        if(predict.getConfidence() > 0.0){
+                        if(predict.getConfidence() > 0.8){
                             String emotionType = predict.getTitle();
                             Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
                             emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);

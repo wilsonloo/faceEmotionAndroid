@@ -2,6 +2,7 @@ package com.arcsoft.arcfacedemo.tflite;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Trace;
 
 import com.arcsoft.arcfacedemo.R;
@@ -175,28 +176,46 @@ public abstract class Classifier {
 
   // 获取前K排名
   private static List<Recognition> getTopKProbability(Map<String /*标签*/, Float /*预测成该标签的概率*/> labelProb, int topK) {
-    // 使用最大堆实现
-    PriorityQueue<Recognition> pq =
-        new PriorityQueue<>(
-            MAX_RESULTS,
-            new Comparator<Recognition>() {
-              @Override
-              public int compare(Recognition o1, Recognition o2) {
-                return o2.getConfidence().compareTo(o1.getConfidence());
-              }
-            });
+    topK = Math.min(topK, MAX_RESULTS);
 
+    final ArrayList<Recognition> recognitionArrayList = new ArrayList<>();
+    recognitionArrayList.clear();
+
+    if(topK == 1) {
+      // 只取第一个，使用快速算法
+      Map.Entry<String, Float> maxEntry = null;
       for (Map.Entry<String, Float> entry : labelProb.entrySet()) {
-        pq.add(new Recognition(""+entry.getKey(), entry.getKey(), entry.getValue()));
+        if(maxEntry == null || entry.getValue() > maxEntry.getValue()){
+            maxEntry = entry;
+        }
       }
 
-      final ArrayList<Recognition> recognitionArrayList = new ArrayList<>();
-      int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
-      for (int k = 0; k < recognitionsSize; ++k){
-        recognitionArrayList.add(pq.poll());
+      if(maxEntry != null){
+        recognitionArrayList.add(new Recognition(""+maxEntry.getKey(), maxEntry.getKey(), maxEntry.getValue()));
       }
+    }else{
+      // 使用最大堆实现
+      PriorityQueue<Recognition> pq =
+          new PriorityQueue<>(
+                  topK,
+              new Comparator<Recognition>() {
+                @Override
+                public int compare(Recognition o1, Recognition o2) {
+                  return o2.getConfidence().compareTo(o1.getConfidence());
+              }
+              });
 
-      return recognitionArrayList;
+        for (Map.Entry<String, Float> entry : labelProb.entrySet()) {
+          pq.add(new Recognition(""+entry.getKey(), entry.getKey(), entry.getValue()));
+        }
+
+        int recognitionsSize = Math.min(pq.size(), topK);
+        for (int k = 0; k < recognitionsSize; ++k){
+          recognitionArrayList.add(pq.poll());
+        }
+    }
+
+    return recognitionArrayList;
   }
 
   // 加载图片并进行预处理(例如尺寸统一化、旋转等)
