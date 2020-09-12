@@ -243,40 +243,26 @@ public class DrawHelper {
         if (view.getId() == R.id.fe_emotion_rect_view) {
             Bundle bundle = drawInfo.getBundle();
             if (bundle != null) {
-                // 对人脸进行表情预测
-                Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
+                String emotionType = bundle.getString("emotionType");
+                Integer emotionResourceId = bundle.getInt("emotionResourceId");
+                Float confidence = bundle.getFloat("confidence");
 
-                if (faceBitmap != null) {
-                    // 进行分类预测，并产生表情
-                    DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
-                    Classifier classifier = curActivity.getClassifier();
-                    Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                if (emotionType != null && confidence != null && emotionResourceId != null) {
+                    // 加载图片到指定大小
+                    Bitmap emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
+                    emotionBitmap = adjustToSize(emotionBitmap, rect.width(), rect.height());
 
-                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 0);
-                    if(recognitions.size() > 0){
-                        Classifier.Recognition predict = recognitions.get(0);
-                        if(predict.getConfidence() > 0.8){
-                            // 获取表镜名称、对应图片资源
-                            String emotionType = predict.getTitle();
-                            Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
+                    // 显示表情的置信度
+                    DecimalFormat fConfidence = new DecimalFormat("##0.00");
+                    String faceDesc = emotionType + " clevel:" + fConfidence.format(confidence);
 
-                            // 加载图片到指定大小
-                            Bitmap emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
-                            emotionBitmap = adjustToSize(emotionBitmap, rect.width(), rect.height());
+                    // 绘制识别信息
+                    paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                    paint.setTextSize(rect.width() / 8);
+                    canvas.drawText(faceDesc, rect.left, rect.top - 10, paint);
 
-                            // 显示表情的置信度
-                            DecimalFormat fConfidence = new DecimalFormat("##0.00");
-                            String faceDesc = emotionType + " clevel:" + fConfidence.format(predict.getConfidence());
-
-                            // 绘制识别信息
-                            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                            paint.setTextSize(rect.width() / 8);
-                            canvas.drawText(faceDesc, rect.left, rect.top - 10, paint);
-
-                            // 左上角的坐标left,top
-                            canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
-                        }
-                    }
+                    // 左上角的坐标left,top
+                    canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
                 }
             }
         }else{

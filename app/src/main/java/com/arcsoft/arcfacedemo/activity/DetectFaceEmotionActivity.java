@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -44,6 +45,7 @@ import com.arcsoft.face.model.ArcSoftImageInfo;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,8 +189,18 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         Matrix matrix = new Matrix();
                         matrix.setRotate(90);
                         Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height, matrix, false);
+
                         Bundle bundle = new Bundle();
-                        bundle.putParcelable("faceBitmap", faceBitmap);
+                        // 进行预测和绘制
+                        Object[] predictResult = predict(faceBitmap);
+                        if(predictResult != null) {
+                            String emotionType = (String) predictResult[0];
+                            Float confidence = (Float) predictResult[1];
+
+                            bundle.putString("emotionType", emotionType);
+                            bundle.putFloat("confidence", confidence);
+                            bundle.putInt("emotionResourceId", mClassifier.GetEmotionResourceId(emotionType));
+                        }
 
                         DrawInfo newDrawInfo = new DrawInfo(
                                 adjustFaceRect,
@@ -204,6 +216,26 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                     drawHelper.draw(faceRectView, drawInfoList);
                     drawHelper.draw(emotionRectView, drawInfoList);
                 }
+            }
+
+            // 进行预测
+            private Object[] predict(Bitmap faceBitmap) {
+                // 进行分类预测，并产生表情
+                Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+                ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) mClassifier.RecognizeImage(faceBitmap8888, 0);
+                if (recognitions.size() > 0) {
+                    Classifier.Recognition predict = recognitions.get(0);
+                    if (predict.getConfidence() > 0.8) {
+                        // 获取表镜名称、对应图片资源
+                        String emotionType = predict.getTitle();
+                        Float confidence = predict.getConfidence();
+
+                        return new Object[]{emotionType, confidence};
+                    }
+                }
+
+                return null;
             }
 
             @Override
