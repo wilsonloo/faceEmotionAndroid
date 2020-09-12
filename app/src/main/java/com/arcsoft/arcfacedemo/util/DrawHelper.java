@@ -18,7 +18,6 @@ import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.activity.DetectFaceEmotionActivity;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
 import com.arcsoft.arcfacedemo.tflite.Classifier;
-import com.arcsoft.arcfacedemo.tfpb.ClassifierPb;
 import com.arcsoft.arcfacedemo.widget.FaceRectView;
 import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.GenderInfo;
