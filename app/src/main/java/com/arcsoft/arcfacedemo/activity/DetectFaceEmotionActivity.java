@@ -25,7 +25,6 @@ import android.view.WindowManager;
 import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
 import com.arcsoft.arcfacedemo.tflite.Classifier;
-import com.arcsoft.arcfacedemo.tfpb.ClassifierPb;
 import com.arcsoft.arcfacedemo.util.ConfigUtil;
 import com.arcsoft.arcfacedemo.util.DrawHelper;
 import com.arcsoft.arcfacedemo.util.camera.CameraHelper;
@@ -81,9 +80,6 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
     private Classifier mClassifier;
     public Classifier getClassifier(){ return mClassifier;}
-
-    private ClassifierPb mClassifierPb;
-    public ClassifierPb getClassifierPb(){ return mClassifierPb;}
 
     // 私有函数列表 ***********************************************************
     private void initEngine() {
