@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -17,6 +18,7 @@ import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.activity.DetectFaceEmotionActivity;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
 import com.arcsoft.arcfacedemo.tflite.Classifier;
+import com.arcsoft.arcfacedemo.tfpb.ClassifierPb;
 import com.arcsoft.arcfacedemo.widget.FaceRectView;
 import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.GenderInfo;
@@ -182,6 +184,22 @@ public class DrawHelper {
         return newRect;
     }
 
+    public static Bitmap adjustToSize(Bitmap bitmap, int newWidth, int newHeight){
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        // 计算缩放比例
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+
+        // 取得想要缩放的matrix参数
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // 得到新的图片
+        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+    }
+
     /**
      * 绘制数据信息到view上，若 {@link DrawInfo#getName()} 不为null则绘制 {@link DrawInfo#getName()}
      *
@@ -224,44 +242,43 @@ public class DrawHelper {
 
         // 绘制卡通表情
         if (view.getId() == R.id.fe_emotion_rect_view) {
-            String faceDesc = "unknown";
-
             Bundle bundle = drawInfo.getBundle();
             if (bundle != null) {
                 // 对人脸进行表情预测
                 Bitmap faceBitmap = bundle.getParcelable("faceBitmap");
-                Bitmap emotionBitmap = null;
 
                 if (faceBitmap != null) {
                     // 进行分类预测，并产生表情
                     DetectFaceEmotionActivity curActivity = (DetectFaceEmotionActivity)view.getContext();
                     Classifier classifier = curActivity.getClassifier();
                     Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
-                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 90);
+
+                    ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) classifier.RecognizeImage(faceBitmap8888, 0);
                     if(recognitions.size() > 0){
                         Classifier.Recognition predict = recognitions.get(0);
                         if(predict.getConfidence() > 0.8){
+                            // 获取表镜名称、对应图片资源
                             String emotionType = predict.getTitle();
                             Integer emotionResourceId = classifier.GetEmotionResourceId(emotionType);
-                            emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
 
+                            // 加载图片到指定大小
+                            Bitmap emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
+                            emotionBitmap = adjustToSize(emotionBitmap, rect.width(), rect.height());
+
+                            // 显示表情的置信度
                             DecimalFormat fConfidence = new DecimalFormat("##0.00");
-                            faceDesc = emotionType + " clevel:" + fConfidence.format(predict.getConfidence());
+                            String faceDesc = emotionType + " clevel:" + fConfidence.format(predict.getConfidence());
+
+                            // 绘制识别信息
+                            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                            paint.setTextSize(rect.width() / 8);
+                            canvas.drawText(faceDesc, rect.left, rect.top - 10, paint);
+
+                            // 左上角的坐标left,top
+                            canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
                         }
                     }
                 }
-
-                if(emotionBitmap == null){
-                    emotionBitmap = BitmapFactory.decodeResource(view.getResources(), R.mipmap.happy);
-                }
-
-                // 绘制识别信息
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setTextSize(rect.width() / 8);
-                canvas.drawText(faceDesc, rect.left, rect.top - 10, paint);
-
-                // 左上角的坐标left,top
-                canvas.drawBitmap(emotionBitmap, rect.left, rect.top, paint);
             }
         }else{
             if (drawInfo.getName() == null) {

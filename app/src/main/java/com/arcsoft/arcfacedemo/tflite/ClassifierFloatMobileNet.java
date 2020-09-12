@@ -9,9 +9,9 @@ import java.io.IOException;
 
 public class ClassifierFloatMobileNet extends Classifier {
     /** Float MobileNet requires additional normalization of the used input. */
-    private static final float IMAGE_MEAN = 127.5f;
+    private static final float IMAGE_MEAN = 0.0f;
 
-    private static final float IMAGE_STD = 127.5f;
+    private static final float IMAGE_STD = 255.0f;
 
     /**
      * Float model does not need dequantization in the post-processing. Setting mean and std as 0.0f
@@ -30,7 +30,7 @@ public class ClassifierFloatMobileNet extends Classifier {
 
     @Override
     public String getModelPath() {
-        return "emotion.tflite";
+        return "emotion.mobilenetV2_x75_092.tflite";
     }
 
     @Override
@@ -40,11 +40,13 @@ public class ClassifierFloatMobileNet extends Classifier {
 
     @Override
     protected TensorOperator getPreprocessNormalizeOp() {
+        // return (x - IMAGE_MEAN) / IMAGE_STD
         return new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
     }
 
     @Override
     protected TensorOperator getPostprocessNormalizeOp() {
+        // return (x - PROBABILITY_MEAN) / PROBABILITY_STD
         return new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
     }
 }
