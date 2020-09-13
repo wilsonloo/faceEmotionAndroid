@@ -2,3 +2,9 @@ app/src/main/assets/emotin.tflite filter=lfs diff=lfs merge=lfs -text
 app/src/main/assets/emotion.mobilenetV2_x75_092.tflite filter=lfs diff=lfs merge=lfs -text
 app/src/main/assets/emotion.model.mobilenetV2_x75_1.00_20200913.tflite filter=lfs diff=lfs merge=lfs -text
 app/src/main/assets/happy_11.jpg filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/disgust.png filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/fear.png filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/happy.png filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/ic_launcher.png filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/sad.png filter=lfs diff=lfs merge=lfs -text
+app/src/main/res/mipmap-xxhdpi/anger.png filter=lfs diff=lfs merge=lfs -text
