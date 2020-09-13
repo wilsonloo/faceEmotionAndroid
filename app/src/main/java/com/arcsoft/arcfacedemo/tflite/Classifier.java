@@ -3,10 +3,13 @@ package com.arcsoft.arcfacedemo.tflite;
 import android.app.Activity;
 import android.graphics.Bitmap;
 
-import com.arcsoft.arcfacedemo.R;
+import com.arcsoft.arcfacedemo.common.EmotionResourceMap;
+import com.arcsoft.arcfacedemo.remote.ClassifierRemote;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.gpu.GpuDelegate;
+import org.tensorflow.lite.nnapi.NnApiDelegate;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.common.TensorProcessor;
@@ -24,7 +27,6 @@ import java.nio.MappedByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -42,7 +44,8 @@ public abstract class Classifier {
         FLOAT_MOBILENET,
         QUANTIZED_MOBILENET,
         FLOAT_EFFICIENTNET,
-        QUANTIZED_EFFICIENTNET
+        QUANTIZED_EFFICIENTNET,
+        PYTHON_REMOTE,
     }
 
     /**
@@ -62,12 +65,12 @@ public abstract class Classifier {
     /**
      * Image size along the x axis.
      */
-    private final int imageSizeX;
+    protected final int imageSizeX;
 
     /**
      * Image size along the y axis.
      */
-    private final int imageSizeY;
+    protected final int imageSizeY;
 
     /**
      * An instance of the driver class to run model inference with Tensorflow Lite.
@@ -87,7 +90,7 @@ public abstract class Classifier {
     /**
      * Input image TensorBuffer.
      */
-    private TensorImage mInputTensorImage;
+    protected TensorImage mInputTensorImage;
 
     /**
      * Output probability TensorBuffer.
@@ -99,7 +102,6 @@ public abstract class Classifier {
      */
     private final TensorProcessor mProbabilityProcessor;
 
-    private final Map<String, Integer> mEmotionResourceMap = new HashMap<>();
 
     // 识别结果
     public static class Recognition {
@@ -124,19 +126,22 @@ public abstract class Classifier {
 
     // 内部构造函数，应该由工厂接口create创建实例
     protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
-        mEmotionResourceMap.put("anger", R.mipmap.anger);
-        mEmotionResourceMap.put("disgust", R.mipmap.disgust);
-        mEmotionResourceMap.put("fear", R.mipmap.fear);
-        mEmotionResourceMap.put("happy", R.mipmap.happy);
-        mEmotionResourceMap.put("sad", R.mipmap.sad);
 
         // 加载tflite 模型
         String modelPath = getModelPath();
         tfliteModel = FileUtil.loadMappedFile(activity, modelPath);
 
-        // 暂时只支持cpu配置
-        if (device != Device.CPU) {
-            throw new UnsupportedOperationException("device:" + device);
+        switch (device) {
+            case NNAPI:
+                NnApiDelegate nnApiDelegate = new NnApiDelegate();
+                tfliteOptions.addDelegate(nnApiDelegate);
+                break;
+            case GPU:
+                GpuDelegate gpuDelegate = new GpuDelegate();
+                tfliteOptions.addDelegate(gpuDelegate);
+                break;
+            case CPU:
+                break;
         }
 
         // 解析器的参数配置
@@ -178,7 +183,7 @@ public abstract class Classifier {
         mProbabilityProcessor = new TensorProcessor.Builder().add(getPostprocessNormalizeOp()).build();
     }
 
-    public List<Recognition> RecognizeImage(final Bitmap bitmap, int sensorOrientation) {
+    public List<Recognition> RecognizeImage(int faceId, final Bitmap bitmap, int sensorOrientation) {
         // 将原始图片载入成tensorflow 的图片张量
         mInputTensorImage.load(bitmap);
         int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
@@ -286,6 +291,8 @@ public abstract class Classifier {
             throws IOException {
         if (model == Model.FLOAT_MOBILENET) {
             return new ClassifierFloatMobileNet(activity, device, numThreads);
+        }else if(model == Model.PYTHON_REMOTE){
+            return new ClassifierRemote(activity, device, numThreads);
         } else {
             throw new UnsupportedOperationException("model:" + model);
         }
@@ -293,7 +300,7 @@ public abstract class Classifier {
 
     public Integer GetEmotionResourceId(String typeName)
             throws InvalidParameterException {
-        Integer resource = mEmotionResourceMap.get(typeName);
+        Integer resource = EmotionResourceMap.getEmotionResource(typeName);
         if (resource == null) {
             throw new InvalidParameterException("unknown emotion type:" + typeName + ":" + typeName.length());
         }

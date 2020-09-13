@@ -30,7 +30,8 @@ public class ClassifierFloatMobileNet extends Classifier {
 
     @Override
     public String getModelPath() {
-        return "emotion.model.mobilenetV2_x75_1.00_20200913.tflite";
+//        return "emotion.model.mobilenetV2_x75_1.00_20200913.tflite";
+        return "emotion.tflite";
     }
 
     @Override

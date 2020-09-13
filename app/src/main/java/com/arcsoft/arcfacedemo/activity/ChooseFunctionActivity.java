@@ -114,7 +114,7 @@ public class ChooseFunctionActivity extends BaseActivity {
                     1);
 
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.tflite_test);
-            ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) testClassifier.RecognizeImage(bitmap, 90);
+            ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) testClassifier.RecognizeImage(0, bitmap, 90);
             System.out.printf(">>> %d recognized \n", recognitions.size());
             for(int k = 0; k < recognitions.size(); ++k){
                 Classifier.Recognition elem = recognitions.get(k);

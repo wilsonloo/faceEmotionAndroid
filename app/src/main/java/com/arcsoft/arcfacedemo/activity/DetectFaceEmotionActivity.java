@@ -4,6 +4,7 @@ package com.arcsoft.arcfacedemo.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -13,8 +14,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.net.UrlQuerySanitizer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -22,6 +25,7 @@ import android.util.Size;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
@@ -45,9 +49,19 @@ import com.arcsoft.face.model.ArcSoftImageInfo;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeObserver.OnGlobalLayoutListener {
@@ -79,6 +93,8 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
     private FaceEngine faceEngine;
     private int afCode = -1;
+
+    private final Map<Integer, Bundle> mFaceLastEmotions = new HashMap<>();
 
     private Classifier mClassifier;
     public Classifier getClassifier(){ return mClassifier;}
@@ -180,7 +196,8 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                     List<DrawInfo> drawInfoList = new ArrayList<>();
                     for (int i = 0; i < faceInfoList.size(); i++) {
                         // 抓取脸部的位图
-                        Rect rawFaceRect = faceInfoList.get(i).getRect();
+                        FaceInfo faceInfo = faceInfoList.get(i);
+                        Rect rawFaceRect = faceInfo.getRect();
                         Rect adjustFaceRect = drawHelper.adjustRect(rawFaceRect);
                         int x = Math.max(0, rawFaceRect.left);
                         int y = Math.max(0, rawFaceRect.top);
@@ -190,16 +207,22 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
                         matrix.setRotate(90);
                         Bitmap faceBitmap = Bitmap.createBitmap(previewBitmap, x, y, width, height, matrix, false);
 
-                        Bundle bundle = new Bundle();
+                        Bundle bundle = null;
                         // 进行预测和绘制
-                        Object[] predictResult = predict(faceBitmap);
+                        Object[] predictResult = predict(faceInfo.getFaceId(), faceBitmap);
                         if(predictResult != null) {
                             String emotionType = (String) predictResult[0];
                             Float confidence = (Float) predictResult[1];
 
+                            bundle = new Bundle();
                             bundle.putString("emotionType", emotionType);
                             bundle.putFloat("confidence", confidence);
                             bundle.putInt("emotionResourceId", mClassifier.GetEmotionResourceId(emotionType));
+
+                            mFaceLastEmotions.put(faceInfo.getFaceId(), bundle);
+                        }else{
+                            // load last emotion
+                            bundle = mFaceLastEmotions.get(faceInfo.getFaceId());
                         }
 
                         DrawInfo newDrawInfo = new DrawInfo(
@@ -219,12 +242,12 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
             }
 
             // 进行预测
-            private Object[] predict(Bitmap faceBitmap) {
+            private Object[] predict(int faceId, Bitmap faceBitmap) {
                 // 进行分类预测，并产生表情
                 Bitmap faceBitmap8888 = faceBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-                ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) mClassifier.RecognizeImage(faceBitmap8888, 0);
-                if (recognitions.size() > 0) {
+                ArrayList<Classifier.Recognition> recognitions = (ArrayList<Classifier.Recognition>) mClassifier.RecognizeImage(faceId, faceBitmap8888, 0);
+                if (recognitions != null && recognitions.size() > 0) {
                     Classifier.Recognition predict = recognitions.get(0);
                     if (predict.getConfidence() > 0.8) {
                         // 获取表镜名称、对应图片资源
@@ -272,8 +295,8 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
     private void initClassifier(int numThreads){
         try {
             mClassifier = Classifier.Create(this,
-                    Classifier.Model.FLOAT_MOBILENET,
-                    Classifier.Device.CPU,
+                    Classifier.Model.PYTHON_REMOTE,
+                    Classifier.Device.GPU,
                     numThreads);
 
         } catch (Exception e) {
@@ -311,6 +334,68 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
         //在布局结束后才做初始化操作
         previewView.getViewTreeObserver().addOnGlobalLayoutListener(this);
+    }
+
+    private void uploadFileAndString(String actionUrl, String newName) {
+        String end = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        try {
+            URL url = new URL(actionUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+            /* 允许Input、Output，不使用Cache */
+            con.setDoInput(true);
+            con.setDoOutput(true);
+            con.setUseCaches(false);
+            /* 设置传送的method=POST */
+            con.setRequestMethod("POST");
+            /* setRequestProperty */
+            con.setRequestProperty("Connection", "Keep-Alive");
+            con.setRequestProperty("Charset", "UTF-8");
+            con.setRequestProperty("Content-Type",
+                    "multipart/form-data;boundary=" + boundary);
+            /* 设置DataOutputStream */
+            DataOutputStream ds = new DataOutputStream(con.getOutputStream());
+            ds.writeBytes(twoHyphens + boundary + end);
+            ds.writeBytes("Content-Disposition: form-data; "
+                    + "name=\"userfile\";filename=\"" + newName + "\"" + end);
+            ds.writeBytes(end);
+
+            AssetManager assetManager = getAssets();
+            InputStream is = assetManager.open("happy_11.jpg");    //直接写assets文件夹下的图片名就可以
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int k = -1;
+            while((k = is.read()) != -1){
+                baos.write(k);
+            }
+            ds.write(baos.toByteArray());
+            ds.writeBytes(end);
+
+            // -----
+            ds.writeBytes(twoHyphens + boundary + end);
+            ds.writeBytes("Content-Disposition: form-data;name=\"name\"" + end);
+            ds.writeBytes(end + URLEncoder.encode("xiexiezhichi", "UTF-8")
+                    + end);
+            // -----
+
+            ds.writeBytes(twoHyphens + boundary + twoHyphens + end);
+            /* close streams */
+            ds.flush();
+
+            /* 取得Response内容 */
+            InputStream is2 = con.getInputStream();
+            int ch2;
+            StringBuffer b2 = new StringBuffer();
+            while ((ch2 = is2.read()) != -1) {
+                b2.append((char) ch2);
+            }
+
+            /* 关闭DataOutputStream */
+            ds.close();
+        } catch (Exception e) {
+            CrashReport.postCatchedException(e);
+        }
     }
 
     @Override

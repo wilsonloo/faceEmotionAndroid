@@ -183,22 +183,6 @@ public class DrawHelper {
         return newRect;
     }
 
-    public static Bitmap adjustToSize(Bitmap bitmap, int newWidth, int newHeight){
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        // 计算缩放比例
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-
-        // 取得想要缩放的matrix参数
-        Matrix matrix = new Matrix();
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // 得到新的图片
-        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-    }
-
     /**
      * 绘制数据信息到view上，若 {@link DrawInfo#getName()} 不为null则绘制 {@link DrawInfo#getName()}
      *
@@ -250,7 +234,7 @@ public class DrawHelper {
                 if (emotionType != null && confidence != null && emotionResourceId != null) {
                     // 加载图片到指定大小
                     Bitmap emotionBitmap = BitmapFactory.decodeResource(view.getResources(), emotionResourceId);
-                    emotionBitmap = adjustToSize(emotionBitmap, rect.width(), rect.height());
+                    emotionBitmap = BitmapUtils.adjustToSize(emotionBitmap, rect.width(), rect.height());
 
                     // 显示表情的置信度
                     DecimalFormat fConfidence = new DecimalFormat("##0.00");
