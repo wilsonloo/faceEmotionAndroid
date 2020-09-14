@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.arcsoft.arcfacedemo.R;
+import com.arcsoft.arcfacedemo.common.Constants;
 import com.arcsoft.arcfacedemo.model.DrawInfo;
 import com.arcsoft.arcfacedemo.tflite.Classifier;
 import com.arcsoft.arcfacedemo.util.ConfigUtil;
@@ -54,6 +55,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidClassException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -76,6 +78,7 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
     private static final String TAG = "DetectFaceEmoActivity";
     private Integer rgbCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+    private Integer mTensorflowType = Constants.TENSORFLOW_TYPE_TFLITE;
     private int processMask = FaceEngine.ASF_AGE | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_GENDER | FaceEngine.ASF_LIVENESS;
 
 
@@ -294,10 +297,19 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
 
     private void initClassifier(int numThreads){
         try {
-            mClassifier = Classifier.Create(this,
-                    Classifier.Model.PYTHON_REMOTE,
-                    Classifier.Device.GPU,
-                    numThreads);
+            if(mTensorflowType == Constants.TENSORFLOW_TYPE_FLASK_REMOTE) {
+                mClassifier = Classifier.Create(this,
+                        Classifier.Model.PYTHON_REMOTE,
+                        Classifier.Device.GPU,
+                        numThreads);
+            }else if(mTensorflowType == Constants.TENSORFLOW_TYPE_TFLITE){
+                mClassifier = Classifier.Create(this,
+                        Classifier.Model.FLOAT_MOBILENET,
+                        Classifier.Device.GPU,
+                        numThreads);
+            }else{
+                throw new InvalidClassException("tensorflow usage type, flaskremote or tflite");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -313,6 +325,7 @@ public class DetectFaceEmotionActivity extends BaseActivity implements ViewTreeO
         // 摄像头
         Intent intent = getIntent();
         rgbCameraId = intent.getIntExtra("whichCamera", Camera.CameraInfo.CAMERA_FACING_BACK);
+        mTensorflowType = intent.getIntExtra("tensorflowType", Constants.TENSORFLOW_TYPE_TFLITE);
 
         setContentView(R.layout.activity_detect_face_emotion);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

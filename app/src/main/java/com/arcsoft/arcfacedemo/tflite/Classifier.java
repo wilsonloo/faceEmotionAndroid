@@ -23,6 +23,8 @@ import org.tensorflow.lite.support.label.TensorLabel;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -192,7 +194,7 @@ public abstract class Classifier {
         // TODO(b/143564309): Fuse ops inside ImageProcessor.
         ImageProcessor imageProcessor = new ImageProcessor.Builder()
             .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-            .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.NEAREST_NEIGHBOR))
+            .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.BILINEAR))
             .add(new Rot90Op(numRotation))
             .add(getPreprocessNormalizeOp())
             .build();

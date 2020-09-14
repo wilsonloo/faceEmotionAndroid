@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import com.arcsoft.arcfacedemo.R;
 import com.arcsoft.arcfacedemo.common.Constants;
@@ -24,7 +26,6 @@ import com.arcsoft.face.enums.RuntimeABI;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +63,7 @@ public class ChooseFunctionActivity extends BaseActivity {
 
     // 摄像头索引
     private int mCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
+    private int mTensorflowType = Constants.TENSORFLOW_TYPE_TFLITE;
 
     private RadioGroup.OnCheckedChangeListener mRadioGroupChooseCameraListener = new RadioGroup.OnCheckedChangeListener(){
         @Override
@@ -82,6 +84,19 @@ public class ChooseFunctionActivity extends BaseActivity {
         }
     };
 
+    private Spinner.OnItemSelectedListener mSpinnerTFliteListener = new Spinner.OnItemSelectedListener(){
+
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int tensorflowType, long l) {
+            mTensorflowType = tensorflowType;
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +114,10 @@ public class ChooseFunctionActivity extends BaseActivity {
         RadioGroup radioGroupChooseCamera =  findViewById(R.id.radio_group_choose_camera);
         radioGroupChooseCamera.check(R.id.rb_back_camera);
         radioGroupChooseCamera.setOnCheckedChangeListener(mRadioGroupChooseCameraListener);
+
+        // tflite type
+        Spinner spinnerTflite = findViewById(R.id.spinner_tensorflows);
+        spinnerTflite.setOnItemSelectedListener(mSpinnerTFliteListener);
 
         CrashReport.initCrashReport(getApplicationContext(), "65b12e9090", true);
 
@@ -262,6 +281,7 @@ public class ChooseFunctionActivity extends BaseActivity {
     public void jumpToDetectFaceEmotionActivity(View view) {
         Bundle bundle = new Bundle();
         bundle.putInt("whichCamera", mCameraIndex);
+        bundle.putInt("tensorflowType", mTensorflowType);
         checkLibraryAndJump(DetectFaceEmotionActivity.class, bundle);
     }
 
